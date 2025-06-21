@@ -15,14 +15,14 @@ https://ptest-8.ipcheck.ing/cdn-cgi/trace
 ```
 ## GET 请求，响应示例：
 ``` text
-fl=4f739
+fl=466f125
 h=ptest-1.ipcheck.ing
 ip=36.161.217.4
-ts=1750485574.972
+ts=1750499896.649
 visit_scheme=https
 uag=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
 colo=SJC
-sliver=none
+sliver=010-tier1
 http=http/2
 loc=CN
 tls=TLSv1.3
@@ -30,8 +30,5 @@ sni=plaintext
 warp=off
 gateway=off
 rbi=off
-kex=X25519MLKEM768
-```
-=off
 kex=X25519MLKEM768
 ```
