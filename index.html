@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分流测试</title>
+  <!-- Tailwind CSS + DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Flag Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    .custom-border {
+      border-left-color: #d1e7dd !important;
+    }
+
+    .custom-btn-primary {
+      background-color: #157347 !important;
+      border-color: #157347 !important;
+      color: white !important;
+    }
+
+    .custom-btn-primary:hover {
+      background-color: #0f5132 !important;
+      border-color: #0f5132 !important;
+    }
+
+    .custom-btn-outline {
+      border-color: #157347 !important;
+      color: #157347 !important;
+    }
+
+    .custom-btn-outline:hover {
+      background-color: #157347 !important;
+      border-color: #157347 !important;
+      color: white !important;
+    }
+
+    .custom-alert {
+      background-color: #d1e7dd !important;
+      border-color: #badbcc !important;
+      color: #0f5132 !important;
+    }
+
+    .custom-alert svg {
+      color: #157347 !important;
+    }
+
+    .custom-success-alert {
+      background-color: #d1e7dd !important;
+      border-color: #badbcc !important;
+      color: #0f5132 !important;
+    }
+
+    .custom-success-alert i {
+      color: #157347 !important;
+    }
+
+    /* IP点击样式 */
+    .ip-clickable {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ip-clickable:hover {
+      text-decoration: underline;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+
+<body class="bg-base-200 min-h-screen" x-data="splitTestApp()" x-init="testAll()">
+  <div class="container mx-auto px-4 py-4 max-w-7xl">
+    <!-- 标题和说明 -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-base-content mb-4">分流测试</h1>
+      <div class="alert max-w-4xl mx-auto custom-alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>分流测试用于判断代理软件基于域名的规则设置是否正确。在进行测试之前，你需要先参考下方的卡片，在你的代理软件里对 IPCheck.ing 的 8 个不同的 URL 设置不同的域名分流规则。</span>
+      </div>
+    </div>
+
+    <!-- 控制按钮 -->
+    <div class="text-center mb-8 space-x-4">
+      <button @click="testAll()" :disabled="isTestingAll" class="btn btn-lg custom-btn-primary relative min-w-64">
+        <span :class="{ 'opacity-0': isTestingAll }">开始测试所有节点</span>
+        <span x-show="isTestingAll" class="absolute inset-0 flex items-center justify-center">
+          <span class="loading loading-spinner loading-sm mr-2"></span>
+          测试中...
+        </span>
+      </button>
+      <button @click="clearResults()" class="btn btn-lg custom-btn-outline">
+        清除结果
+      </button>
+    </div>
+
+    <!-- 测试结果网格 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <template x-for="(test, index) in tests" :key="index">
+        <div class="card bg-base-100 shadow-lg border-l-4 custom-border min-h-[326px]">
+          <div class="card-body flex flex-col">
+            <!-- 卡片头部 -->
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="card-title text-lg flex items-center gap-2">
+                <i class="bi bi-signpost-split-fill"></i>
+                <span>检测</span>
+                <span x-html="`<i class='bi bi-${index + 1}-square'></i>`"></span>
+              </h3>
+              <div class="indicator">
+                <div class="badge badge-sm" :class="{
+                                    'badge-neutral': test.status === 'waiting',
+                                    'badge-warning': test.status === 'testing',
+                                    'badge-success': test.status === 'success',
+                                    'badge-error': test.status === 'error'
+                                }"></div>
+              </div>
+            </div>
+
+            <!-- 域名 -->
+            <div class="text-sm text-base-content/70 mb-2 flex items-center gap-2">
+              <i class="bi bi-hdd-network-fill"></i>
+              <span x-text="test.domain"></span>
+            </div>
+
+            <!-- IP 地址 -->
+            <div class="font-mono text-lg mb-4 min-h-[2rem] flex items-center gap-2" x-data="{ copied: false }">
+              <div class="relative">
+                <i class="bi bi-pc-display-horizontal cursor-pointer transition-colors"
+                  :class="{ 'text-success': copied }" @click="
+                  if (test.ip) {
+                    navigator.clipboard.writeText(test.ip);
+                    copied = true;
+                    setTimeout(() => copied = false, 1000);
+                  }
+                " title="点击复制IP">
+                </i>
+                <div x-show="copied" x-transition:enter="transition ease-out duration-200"
+                  x-transition:enter-start="opacity-0 transform scale-90"
+                  x-transition:enter-end="opacity-100 transform scale-100"
+                  x-transition:leave="transition ease-in duration-200"
+                  x-transition:leave-start="opacity-100 transform scale-100"
+                  x-transition:leave-end="opacity-0 transform scale-90"
+                  class="absolute -top-8 left-1/2 -translate-x-1/2 bg-success text-success-content text-xs font-sans rounded-md px-2 py-1 whitespace-nowrap">
+                  已复制!
+                </div>
+              </div>
+              <div class="flex items-center">
+                <span x-show="test.status === 'waiting'" class="text-base-content/50">等待测试...</span>
+                <span x-show="test.status === 'testing'" class="text-warning">
+                  <span class="loading loading-dots loading-sm"></span>
+                  测试中...
+                </span>
+                <span x-show="test.status === 'success'"
+                  class="max-w-56 truncate text-success cursor-pointer hover:text-success-content hover:underline transition-all duration-200"
+                  x-text="test.ip" @click="openIpModal(test.ip)" title="点击查看IP详情"></span>
+                <span x-show="test.status === 'error'" class="text-error">连接失败</span>
+              </div>
+            </div>
+
+            <!-- 地区信息 -->
+            <div class="flex items-center min-h-[2rem]">
+              <template x-if="test.status === 'waiting'">
+                <span class="text-base-content/50">等待获取地区信息...</span>
+              </template>
+              <template x-if="test.status === 'testing'">
+                <span class="text-warning">获取地区信息中...</span>
+              </template>
+              <template x-if="test.status === 'success' && test.location">
+                <div class="alert max-w-md mx-auto custom-success-alert">
+                  <i class="bi bi-geo-alt-fill text-lg"></i>
+                  <div class="flex items-center gap-2">
+                    <span class="text-base">代理地区: <span class="font-bold"
+                        x-text="getLocationName(test.location)"></span></span>
+                    <span class="text-xs" x-html="getCountryFlag(test.location)"></span>
+                  </div>
+                </div>
+              </template>
+              <template x-if="test.status === 'error'">
+                <span class="text-error">无法获取地区信息</span>
+              </template>
+            </div>
+
+            <!-- 单独测试按钮 -->
+            <div class="card-actions justify-end mt-4">
+              <button @click="testSingle(index)" :disabled="test.status === 'testing'"
+                class="btn btn-sm custom-btn-outline" :class="{ 'loading': test.status === 'testing' }">
+                单独测试
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- 统计信息 -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body">
+        <h3 class="card-title text-xl mb-6">测试结果统计</h3>
+        <div class="stats stats-vertical lg:stats-horizontal w-full">
+          <div class="stat">
+            <div class="stat-figure text-success">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                class="inline-block w-8 h-8 stroke-current">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <div class="stat-title">成功</div>
+            <div class="stat-value text-success" x-text="successCount"></div>
+            <div class="stat-desc" x-text="`${successCount}/8 节点正常`"></div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-figure text-error">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                class="inline-block w-8 h-8 stroke-current">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+            <div class="stat-title">失败</div>
+            <div class="stat-value text-error" x-text="failCount"></div>
+            <div class="stat-desc" x-text="`${failCount}/8 节点异常`"></div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-figure text-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                class="inline-block w-8 h-8 stroke-current">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                </path>
+              </svg>
+            </div>
+            <div class="stat-title">总计</div>
+            <div class="stat-value text-primary">8</div>
+            <div class="stat-desc">测试节点总数</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function splitTestApp() {
+      return {
+        isTestingAll: false,
+        // 添加弹窗相关的数据
+        showIpModal: false,
+        ipModalUrl: '',
+        ipModalLoading: false,
+
+        tests: [
+          {
+            domain: 'ptest-1.ipcheck.ing',
+            url: 'https://ptest-1.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'ptest-2.ipcheck.ing',
+            url: 'https://ptest-2.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'ptest-3.ipcheck.ing',
+            url: 'https://ptest-3.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'ptest-4.ipcheck.ing',
+            url: 'https://ptest-4.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'ptest-5.ipcheck.ing',
+            url: 'https://ptest-5.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'ptest-6.ipcheck.ing',
+            url: 'https://ptest-6.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'ptest-7.ipcheck.ing',
+            url: 'https://ptest-7.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'ptest-8.ipcheck.ing',
+            url: 'https://ptest-8.ipcheck.ing/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          }
+        ],
+
+        get successCount() {
+          return this.tests.filter(test => test.status === 'success').length;
+        },
+
+        get failCount() {
+          return this.tests.filter(test => test.status === 'error').length;
+        },
+
+        // 根据国家代码获取国旗
+        getCountryFlag(countryCode) {
+          if (!countryCode) return '';
+          return `<span class="fi fi-${countryCode.toLowerCase()}" style="font-size: 1.5em;"></span>`;
+        },
+
+        // 根据国家代码获取地区名称
+        getLocationName(countryCode) {
+          const nameMap = {
+            'CN': '中国',
+            'HK': '香港',
+            'TW': '台湾',
+            'US': '美国',
+            'JP': '日本',
+            'KR': '韩国',
+            'SG': '新加坡',
+            'GB': '英国',
+            'DE': '德国',
+            'FR': '法国',
+            'CA': '加拿大',
+            'AU': '澳大利亚',
+            'NL': '荷兰',
+            'RU': '俄罗斯',
+            'IN': '印度',
+            'BR': '巴西',
+            'IT': '意大利',
+            'ES': '西班牙',
+            'MX': '墨西哥',
+            'TH': '泰国',
+            'MY': '马来西亚',
+            'ID': '印度尼西亚',
+            'PH': '菲律宾',
+            'VN': '越南'
+          };
+          return nameMap[countryCode] || countryCode || '未知';
+        },
+
+        // 添加打开IP弹窗的方法
+        openIpModal(ip) {
+          if (!ip || ip === '获取失败') {
+            return;
+          }
+
+          const url = `https://ping0.cc/ip/${ip}`;
+
+          // --- 居中对齐的关键代码 ---
+
+          // 1. 定义弹窗的尺寸
+          const popupWidth = 1000;
+          const popupHeight = 1040;
+
+          // 2. 计算弹窗的左上角坐标，使其居中
+          // 屏幕中心点 X 坐标 - 弹窗宽度的一半
+          const left = (window.screen.width / 2) - (popupWidth / 2);
+          // 屏幕中心点 Y 坐标 - 弹窗高度的一半
+          const top = (window.screen.height / 2) - (popupHeight / 2);
+
+          // 3. 将计算出的坐标和尺寸加入到特性字符串中
+          const windowFeatures = `
+                width=${popupWidth},
+                height=${popupHeight},
+                top=${top},
+                left=${left},
+                scrollbars=yes,
+                resizable=yes
+              `;
+          window.open(url, '_blank', windowFeatures);
+        },
+
+        async testSingle(index) {
+          const test = this.tests[index];
+          test.status = 'testing';
+          test.ip = '';
+          test.location = '';
+
+          try {
+            const response = await axios.get(test.url, {
+              timeout: 10000,
+              headers: {
+                'Accept': 'text/plain'
+              }
+            });
+
+            if (response.status === 200) {
+              const lines = response.data.split('\n');
+              let ip = '';
+              let location = '';
+
+              for (const line of lines) {
+                if (line.startsWith('ip=')) {
+                  ip = line.substring(3);
+                }
+                if (line.startsWith('loc=')) {
+                  location = line.substring(4);
+                }
+              }
+
+              test.ip = ip || '获取失败';
+              test.location = location || '';
+              test.status = 'success';
+            } else {
+              throw new Error('请求失败');
+            }
+          } catch (error) {
+            console.error(`测试节点 ${index + 1} 失败:`, error);
+            test.status = 'error';
+            test.ip = '';
+            test.location = '';
+          }
+        },
+
+        async testAll() {
+          this.isTestingAll = true;
+
+          // 重置所有状态
+          this.tests.forEach(test => {
+            test.status = 'waiting';
+            test.ip = '';
+            test.location = '';
+          });
+
+          // 并发测试所有节点
+          const promises = this.tests.map(async (test, index) => {
+            await this.testSingle(index);
+          });
+
+          await Promise.all(promises);
+          this.isTestingAll = false;
+        },
+
+        clearResults() {
+          this.tests.forEach(test => {
+            test.status = 'waiting';
+            test.ip = '';
+            test.location = '';
+          });
+          this.isTestingAll = false;
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
