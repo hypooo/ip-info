@@ -17,67 +17,110 @@
   <!-- Axios -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="icon" type="image/png" href="https://ipcheck.ing/favicon.ico">
+  <link
+    href="https://fonts.googleapis.com/css2?family=LXGW+WenKai:wght@300;400;700&family=LXGW+WenKai+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
   <style>
+    body {
+      font-family: 'LXGW WenKai', sans-serif;
+      background-color: #ffffff;
+      color: #333333;
+
+      .ip-font {
+        font-family: 'LXGW WenKai Mono', monospace;
+      }
+    }
+
     .custom-border {
-      border-left-color: #d1e7dd !important;
+      border-left-color: #cccccc !important;
     }
 
     .custom-btn-primary {
-      background-color: #157347 !important;
-      border-color: #157347 !important;
+      background-color: #333333 !important;
+      border-color: #333333 !important;
       color: white !important;
     }
 
     .custom-btn-primary:hover {
-      background-color: #0f5132 !important;
-      border-color: #0f5132 !important;
+      background-color: #555555 !important;
+      border-color: #555555 !important;
     }
 
     .custom-btn-outline {
-      border-color: #157347 !important;
-      color: #157347 !important;
+      border-color: #333333 !important;
+      color: #333333 !important;
+      background-color: transparent !important;
     }
 
     .custom-btn-outline:hover {
-      background-color: #157347 !important;
-      border-color: #157347 !important;
+      background-color: #333333 !important;
       color: white !important;
     }
 
     .custom-alert {
-      background-color: #d1e7dd !important;
-      border-color: #badbcc !important;
-      color: #0f5132 !important;
+      background-color: #f5f5f5 !important;
+      border-color: #cccccc !important;
+      color: #333333 !important;
     }
 
     .custom-alert svg {
-      color: #157347 !important;
+      color: #333333 !important;
     }
 
     .custom-success-alert {
-      background-color: #d1e7dd !important;
-      border-color: #badbcc !important;
-      color: #0f5132 !important;
+      background-color: #f5f5f5 !important;
+      border-color: #cccccc !important;
+      color: #333333 !important;
     }
 
     .custom-success-alert i {
-      color: #157347 !important;
+      color: #333333 !important;
     }
 
     /* IP点击样式 */
     .ip-clickable {
       cursor: pointer;
-      transition: all 0.2s ease;
     }
 
     .ip-clickable:hover {
       text-decoration: underline;
-      transform: scale(1.05);
+    }
+
+    /* 黑白主题覆盖 */
+    .bg-base-200 {
+      background-color: #f9f9f9 !important;
+    }
+
+    .bg-base-100 {
+      background-color: #ffffff !important;
+    }
+
+    .text-base-content {
+      color: #333333 !important;
+    }
+
+    .text-primary {
+      color: #333333 !important;
+    }
+
+    .card {
+      box-shadow: none !important;
+      border: 1px solid #cccccc !important;
+    }
+
+    .stat-figure svg {
+      color: #333333 !important;
+    }
+
+    /* 国旗样式，解决白色背景冲突 */
+    .flag-icon {
+      border-radius: 2px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 
-<body class="bg-base-200 min-h-screen" x-data="splitTestApp()" x-init="testAll()">
+<body class="bg-white min-h-screen" x-data="splitTestApp()" x-init="testAll()">
   <div class="container mx-auto px-4 py-4 max-w-7xl">
     <!-- 标题和说明 -->
     <div class="text-center mb-8">
@@ -108,7 +151,7 @@
     <!-- 测试结果网格 -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <template x-for="(test, index) in tests" :key="index">
-        <div class="card bg-base-100 shadow-lg border-l-4 custom-border min-h-[326px]">
+        <div class="card bg-base-100 border-l-4 custom-border min-h-[280px]">
           <div class="card-body flex flex-col">
             <!-- 卡片头部 -->
             <div class="flex items-center justify-between mb-4">
@@ -134,7 +177,7 @@
             </div>
 
             <!-- IP 地址 -->
-            <div class="font-mono text-lg mb-4 min-h-[2rem] flex items-center gap-2" x-data="{ copied: false }">
+            <div class="ip-font text-lg mb-4 min-h-[2rem] flex items-center gap-2" x-data="{ copied: false }">
               <div class="relative">
                 <i class="bi bi-pc-display-horizontal cursor-pointer transition-colors"
                   :class="{ 'text-success': copied }" @click="
@@ -162,7 +205,7 @@
                   测试中...
                 </span>
                 <span x-show="test.status === 'success'"
-                  class="max-w-56 truncate text-success cursor-pointer hover:text-success-content hover:underline transition-all duration-200"
+                  class="max-w-56 truncate text-base-content cursor-pointer hover:underline transition-all duration-200"
                   x-text="test.ip" @click="openIpModal(test.ip)" title="点击查看IP详情"></span>
                 <span x-show="test.status === 'error'" class="text-error">连接失败</span>
               </div>
@@ -177,13 +220,9 @@
                 <span class="text-warning">获取地区信息中...</span>
               </template>
               <template x-if="test.status === 'success' && test.location">
-                <div class="alert max-w-md mx-auto custom-success-alert">
-                  <i class="bi bi-geo-alt-fill text-lg"></i>
-                  <div class="flex items-center gap-2">
-                    <span class="text-base">代理地区: <span class="font-bold"
-                        x-text="getLocationName(test.location)"></span></span>
-                    <span class="text-xs" x-html="getCountryFlag(test.location)"></span>
-                  </div>
+                <div class="ip-font text-base mb-4 flex items-center gap-2">
+                  <i class="bi bi-geo-alt-fill"></i>
+                  <span x-html="getCountryFlag(test.location)"></span> <span x-text="getLocationName(test.location)"></span>
                 </div>
               </template>
               <template x-if="test.status === 'error'">
@@ -192,9 +231,9 @@
             </div>
 
             <!-- 单独测试按钮 -->
-            <div class="card-actions justify-end mt-4">
+            <div class="card-actions justify-center mt-4">
               <button @click="testSingle(index)" :disabled="test.status === 'testing'"
-                class="btn btn-sm custom-btn-outline" :class="{ 'loading': test.status === 'testing' }">
+                class="btn btn-sm custom-btn-outline min-w-40" :class="{ 'loading': test.status === 'testing' }">
                 单独测试
               </button>
             </div>
@@ -204,7 +243,7 @@
     </div>
 
     <!-- 统计信息 -->
-    <div class="card bg-base-100 shadow-lg">
+    <div class="card bg-base-100">
       <div class="card-body">
         <h3 class="card-title text-xl mb-6">测试结果统计</h3>
         <div class="stats stats-vertical lg:stats-horizontal w-full">
@@ -329,7 +368,7 @@
         // 根据国家代码获取国旗
         getCountryFlag(countryCode) {
           if (!countryCode) return '';
-          return `<span class="fi fi-${countryCode.toLowerCase()}" style="font-size: 1.5em;"></span>`;
+          return `<span class="fi fi-${countryCode.toLowerCase()} flag-icon" style="font-size: 1em;"></span>`;
         },
 
         // 根据国家代码获取地区名称
