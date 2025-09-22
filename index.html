@@ -17,9 +17,7 @@
   <!-- Axios -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="icon" type="image/png" href="https://ipcheck.ing/favicon.ico">
-  <link
-    href="https://fonts.googleapis.com/css2?family=LXGW+WenKai:wght@300;400;700&family=LXGW+WenKai+Mono:wght@400;700&display=swap"
-    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont/style.css"/>
   <style>
     body {
       font-family: 'LXGW WenKai', sans-serif;
@@ -115,7 +113,7 @@
     /* 国旗样式，解决白色背景冲突 */
     .flag-icon {
       border-radius: 2px;
-      box-shadow: 0 0 3px rgba(0,0,0,0.1);
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
@@ -222,7 +220,8 @@
               <template x-if="test.status === 'success' && test.location">
                 <div class="ip-font text-base mb-4 flex items-center gap-2">
                   <i class="bi bi-geo-alt-fill"></i>
-                  <span x-html="getCountryFlag(test.location)"></span> <span x-text="getLocationName(test.location)"></span>
+                  <span x-html="getCountryFlag(test.location)"></span> <span
+                    x-text="getLocationName(test.location)"></span>
                 </div>
               </template>
               <template x-if="test.status === 'error'">
