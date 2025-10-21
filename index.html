@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
   <title>分流测试</title>
   <!-- Tailwind CSS + DaisyUI -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
@@ -19,60 +20,124 @@
   <link rel="icon" type="image/png" href="https://ipcheck.ing/favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont/style.css"/>
   <style>
-    body {
-      font-family: 'LXGW WenKai', sans-serif;
-      background-color: #ffffff;
-      color: #333333;
+    :root {
+      color-scheme: light;
+      --bg-body: #ffffff;
+      --text-body: #333333;
+      --surface-muted: #f9f9f9;
+      --surface: #ffffff;
+      --border-color: #cccccc;
+      --btn-primary-bg: #333333;
+      --btn-primary-hover-bg: #555555;
+      --btn-primary-text: #ffffff;
+      --btn-outline-border: #333333;
+      --btn-outline-text: #333333;
+      --btn-outline-hover-bg: #333333;
+      --btn-outline-hover-text: #ffffff;
+      --alert-bg: var(--surface-muted);
+      --alert-text: var(--text-body);
+      --stat-figure-color: #333333;
+      --flag-shadow: rgba(0, 0, 0, 0.1);
+      --success-color: #16a34a;
+      --error-color: #dc2626;
+      --info-color: #2563eb;
+    }
 
-      .ip-font {
-        font-family: 'LXGW WenKai Mono', monospace;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg-body: #1a1a1a;
+        --text-body: #f3f4f6;
+        --surface-muted: #1a1a1a;
+        --surface: #1a1a1a;
+        --border-color: #3d3d3d;
+        --btn-primary-bg: #424242;
+        --btn-primary-hover-bg: #595959;
+        --btn-primary-text: #f8fafc;
+        --btn-outline-border: #6b6b6b;
+        --btn-outline-text: #e0e0e0;
+        --btn-outline-hover-bg: #6b6b6b;
+        --btn-outline-hover-text: #121212;
+        --alert-bg: var(--surface);
+        --alert-text: var(--text-body);
+        --stat-figure-color: #e0e0e0;
+        --flag-shadow: rgba(0, 0, 0, 0.45);
+        --success-color: #4ade80;
+        --error-color: #f87171;
+        --info-color: #8ab4f8;
+      }
+
+      html,
+      body,
+      #app,
+      .container,
+      [class*="base"] {
+        background-color: #1a1a1a !important;
       }
     }
 
+    body {
+      font-family: 'LXGW WenKai', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-body);
+    }
+
+    .container {
+      background-color: var(--bg-body) !important;
+    }
+
+    .ip-font {
+      font-family: 'LXGW WenKai Mono', monospace;
+    }
+
     .custom-border {
-      border-left-color: #cccccc !important;
+      border-left-color: var(--border-color) !important;
     }
 
     .custom-btn-primary {
-      background-color: #333333 !important;
-      border-color: #333333 !important;
-      color: white !important;
+      background-color: var(--btn-primary-bg) !important;
+      border-color: var(--btn-primary-bg) !important;
+      color: var(--btn-primary-text) !important;
     }
 
     .custom-btn-primary:hover {
-      background-color: #555555 !important;
-      border-color: #555555 !important;
+      background-color: var(--btn-primary-hover-bg) !important;
+      border-color: var(--btn-primary-hover-bg) !important;
     }
 
     .custom-btn-outline {
-      border-color: #333333 !important;
-      color: #333333 !important;
+      border-color: var(--btn-outline-border) !important;
+      color: var(--btn-outline-text) !important;
       background-color: transparent !important;
     }
 
     .custom-btn-outline:hover {
-      background-color: #333333 !important;
-      color: white !important;
+      background-color: var(--btn-outline-hover-bg) !important;
+      color: var(--btn-outline-hover-text) !important;
+    }
+
+    .alert {
+      border: 1px solid var(--border-color) !important;
     }
 
     .custom-alert {
-      background-color: #f5f5f5 !important;
-      border-color: #cccccc !important;
-      color: #333333 !important;
+      background-color: var(--surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--alert-text) !important;
     }
 
     .custom-alert svg {
-      color: #333333 !important;
+      color: var(--alert-text) !important;
     }
 
     .custom-success-alert {
-      background-color: #f5f5f5 !important;
-      border-color: #cccccc !important;
-      color: #333333 !important;
+      background-color: var(--alert-bg) !important;
+      border-color: var(--border-color) !important;
+      color: var(--alert-text) !important;
     }
 
     .custom-success-alert i {
-      color: #333333 !important;
+      color: var(--alert-text) !important;
     }
 
     /* IP点击样式 */
@@ -86,39 +151,90 @@
 
     /* 黑白主题覆盖 */
     .bg-base-200 {
-      background-color: #f9f9f9 !important;
+      background-color: var(--surface-muted) !important;
     }
 
     .bg-base-100 {
-      background-color: #ffffff !important;
+      background-color: var(--surface) !important;
     }
 
     .text-base-content {
-      color: #333333 !important;
+      color: var(--text-body) !important;
     }
 
     .text-primary {
-      color: #333333 !important;
+      color: var(--text-body) !important;
     }
 
     .card {
       box-shadow: none !important;
-      border: 1px solid #cccccc !important;
+      border: 1px solid var(--border-color) !important;
+      background-color: var(--surface) !important;
     }
 
     .stat-figure svg {
-      color: #333333 !important;
+      color: var(--stat-figure-color) !important;
     }
 
     /* 国旗样式，解决白色背景冲突 */
     .flag-icon {
       border-radius: 2px;
-      box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 3px var(--flag-shadow);
+    }
+
+    .statistics-card {
+      background-color: var(--surface) !important;
+    }
+
+    .statistics-card .card-body {
+      background-color: var(--surface) !important;
+    }
+
+    .statistics-card .stats {
+      gap: 1.5rem;
+      background-color: var(--surface) !important;
+      border: none !important;
+      box-shadow: none !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+    }
+
+    .statistics-card .stat {
+      background-color: var(--surface) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 0.75rem;
+      color: var(--text-body);
+      padding: 1.5rem !important;
+      place-items: unset !important;
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+      grid-column-start: unset !important;
+    }
+
+    .statistics-card .stat-title,
+    .statistics-card .stat-desc {
+      color: var(--text-body);
+      opacity: 0.7;
+    }
+
+    .statistics-card .text-success,
+    .statistics-card .stat-figure.text-success {
+      color: var(--success-color) !important;
+    }
+
+    .statistics-card .text-error,
+    .statistics-card .stat-figure.text-error {
+      color: var(--error-color) !important;
+    }
+
+    .statistics-card .text-primary,
+    .statistics-card .stat-figure.text-primary {
+      color: var(--info-color) !important;
     }
   </style>
 </head>
 
-<body class="bg-white min-h-screen" x-data="splitTestApp()" x-init="testAll()">
+<body class="min-h-screen" x-data="splitTestApp()" x-init="testAll()">
   <div class="container mx-auto px-4 py-4 max-w-7xl">
     <!-- 标题和说明 -->
     <div class="text-center mb-8">
@@ -242,7 +358,7 @@
     </div>
 
     <!-- 统计信息 -->
-    <div class="card bg-base-100">
+    <div class="card bg-base-100 statistics-card">
       <div class="card-body">
         <h3 class="card-title text-xl mb-6">测试结果统计</h3>
         <div class="stats stats-vertical lg:stats-horizontal w-full">
