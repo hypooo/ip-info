@@ -187,16 +187,7 @@
     }
 
     .statistics-card .card-body {
-      background-color: var(--surface) !important;
-    }
-
-    .statistics-card .stats {
-      gap: 1.5rem;
-      background-color: var(--surface) !important;
-      border: none !important;
-      box-shadow: none !important;
-      display: flex !important;
-      flex-wrap: wrap !important;
+      background-color: transparent !important;
     }
 
     .statistics-card .stat {
@@ -206,9 +197,6 @@
       color: var(--text-body);
       padding: 1.5rem !important;
       place-items: unset !important;
-      flex: 1 1 0% !important;
-      min-width: 0 !important;
-      grid-column-start: unset !important;
     }
 
     .statistics-card .stat-title,
@@ -274,13 +262,25 @@
                 <span>检测</span>
                 <span x-html="`<i class='bi bi-${index + 1}-square'></i>`"></span>
               </h3>
-              <div class="indicator">
-                <div class="badge badge-sm" :class="{
-                                    'badge-neutral': test.status === 'waiting',
-                                    'badge-warning': test.status === 'testing',
-                                    'badge-success': test.status === 'success',
-                                    'badge-error': test.status === 'error'
-                                }"></div>
+              <div class="flex items-center gap-2">
+                <div class="indicator">
+                  <div class="badge badge-sm" :class="{
+                                      'badge-neutral': test.status === 'waiting',
+                                      'badge-warning': test.status === 'testing',
+                                      'badge-success': test.status === 'success',
+                                      'badge-error': test.status === 'error'
+                                  }"></div>
+                </div>
+                <!-- Latency display -->
+                <template x-if="test.status === 'success'">
+                  <div class="text-sm text-base-content/70">
+                    <span x-text="test.latency + ' ms'" :class="{
+                        'text-success': test.latency < 200,
+                        'text-warning': test.latency >= 200 && test.latency < 500,
+                        'text-error': test.latency >= 500
+                    }"></span>
+                  </div>
+                </template>
               </div>
             </div>
 
@@ -326,23 +326,27 @@
             </div>
 
             <!-- 地区信息 -->
-            <div class="flex items-center min-h-[2rem]">
-              <template x-if="test.status === 'waiting'">
-                <span class="text-base-content/50">等待获取地区信息...</span>
-              </template>
-              <template x-if="test.status === 'testing'">
-                <span class="text-warning">获取地区信息中...</span>
-              </template>
-              <template x-if="test.status === 'success' && test.location">
-                <div class="ip-font text-base mb-4 flex items-center gap-2">
-                  <i class="bi bi-geo-alt-fill"></i>
-                  <span x-html="getCountryFlag(test.location)"></span> <span
-                    x-text="getLocationName(test.location)"></span>
-                </div>
-              </template>
-              <template x-if="test.status === 'error'">
-                <span class="text-error">无法获取地区信息</span>
-              </template>
+            <div class="flex flex-col min-h-[2rem]">
+              <div class="flex items-center">
+                <template x-if="test.status === 'waiting'">
+                  <span class="text-base-content/50">等待获取地区信息...</span>
+                </template>
+                <template x-if="test.status === 'testing'">
+                  <span class="text-warning">获取地区信息中...</span>
+                </template>
+                <template x-if="test.status === 'success' && test.location">
+                  <div class="ip-font text-base mb-2 flex items-center gap-2">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span x-html="getCountryFlag(test.location)"></span> <span
+                      x-text="getLocationName(test.location)"></span>
+                  </div>
+                </template>
+                <template x-if="test.status === 'error'">
+                  <span class="text-error">无法获取地区信息</span>
+                </template>
+              </div>
+
+
             </div>
 
             <!-- 单独测试按钮 -->
@@ -361,7 +365,7 @@
     <div class="card bg-base-100 statistics-card">
       <div class="card-body">
         <h3 class="card-title text-xl mb-6">测试结果统计</h3>
-        <div class="stats stats-vertical lg:stats-horizontal w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
           <div class="stat">
             <div class="stat-figure text-success">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -554,6 +558,9 @@
           test.status = 'testing';
           test.ip = '';
           test.location = '';
+          test.latency = 0;
+
+          const startTime = Date.now();
 
           try {
             const response = await axios.get(test.url, {
@@ -562,6 +569,9 @@
                 'Accept': 'text/plain'
               }
             });
+
+            const endTime = Date.now();
+            test.latency = endTime - startTime;
 
             if (response.status === 200) {
               const lines = response.data.split('\n');
