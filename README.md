@@ -1,30 +1,34 @@
-# China ip tester page
+# 项目组件
+DaisyUI + Tailwind CSS + Alpine.js + Axios
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/hypooos-projects/v0-china-ip-tester-page)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/6eRllHQa2lV)
-
-## Overview
-
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
-
-## Deployment
-
-Your project is live at:
-
-**[https://vercel.com/hypooos-projects/v0-china-ip-tester-page](https://vercel.com/hypooos-projects/v0-china-ip-tester-page)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.app/chat/projects/6eRllHQa2lV](https://v0.app/chat/projects/6eRllHQa2lV)**
-
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+# IP 获取接口：
+## 接口地址
+```text
+https://ptest-1.ipcheck.ing/cdn-cgi/trace
+https://ptest-2.ipcheck.ing/cdn-cgi/trace
+https://ptest-3.ipcheck.ing/cdn-cgi/trace
+https://ptest-4.ipcheck.ing/cdn-cgi/trace
+https://ptest-5.ipcheck.ing/cdn-cgi/trace
+https://ptest-6.ipcheck.ing/cdn-cgi/trace
+https://ptest-7.ipcheck.ing/cdn-cgi/trace
+https://ptest-8.ipcheck.ing/cdn-cgi/trace
+```
+## GET 请求，响应示例：
+``` text
+fl=466f125
+h=ptest-1.ipcheck.ing
+ip=36.161.217.4
+ts=1750499896.649
+visit_scheme=https
+uag=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+colo=SJC
+sliver=010-tier1
+http=http/2
+loc=CN
+tls=TLSv1.3
+sni=plaintext
+warp=off
+gateway=off
+rbi=off
+kex=X25519MLKEM768
+```
