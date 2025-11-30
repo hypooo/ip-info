@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-/* Import LXGW WenKai webfont from npm package */
-@import "lxgw-wenkai-webfont/style.css";
+/* 使用 CDN 导入 LXGW WenKai 字体，避免 npm 包在 Vercel 部署时的路径问题 */
+@import url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css");
 
 @custom-variant dark (&:is(.dark *));
 

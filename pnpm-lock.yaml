@@ -120,7 +120,7 @@ importers:
         specifier: ^0.454.0
         version: 0.454.0(react@19.0.0)
       lxgw-wenkai-webfont:
-        specifier: latest
+        specifier: 1.7.0
         version: 1.7.0
       next:
         specifier: 15.2.4
