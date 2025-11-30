@@ -247,10 +247,14 @@ export default function ProxyTestPage() {
   }
 
   const openIplarkModal = (ip: string) => {
+    const width = 1000
+    const height = 1040
+    const left = (window.screen.width - width) / 2
+    const top = (window.screen.height - height) / 2
     window.open(
       `https://iplark.com/${ip}`,
       "_blank",
-      "width=1000,height=1040,menubar=no,toolbar=no,location=no,status=no",
+      `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`,
     )
   }
 
