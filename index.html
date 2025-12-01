@@ -560,41 +560,56 @@
           test.location = '';
           test.latency = 0;
 
-          const startTime = Date.now();
+          let minLatency = Infinity;
+          let finalResponseData = null;
+          let success = false;
 
-          try {
-            const response = await axios.get(test.url, {
-              timeout: 10000,
-              headers: {
-                'Accept': 'text/plain'
-              }
-            });
-
-            const endTime = Date.now();
-            test.latency = endTime - startTime;
-
-            if (response.status === 200) {
-              const lines = response.data.split('\n');
-              let ip = '';
-              let location = '';
-
-              for (const line of lines) {
-                if (line.startsWith('ip=')) {
-                  ip = line.substring(3);
+          // 连续测试3次，取最小延迟，以消除首次连接建立（DNS/TCP/TLS）带来的额外耗时
+          for (let i = 0; i < 3; i++) {
+            const startTime = Date.now();
+            try {
+              // 添加时间戳防止浏览器缓存响应结果
+              const response = await axios.get(`${test.url}?t=${Date.now()}`, {
+                timeout: 10000,
+                headers: {
+                  'Accept': 'text/plain'
                 }
-                if (line.startsWith('loc=')) {
-                  location = line.substring(4);
-                }
-              }
+              });
 
-              test.ip = ip || '获取失败';
-              test.location = location || '';
-              test.status = 'success';
-            } else {
-              throw new Error('请求失败');
+              const endTime = Date.now();
+              const duration = endTime - startTime;
+
+              if (response.status === 200) {
+                if (duration < minLatency) {
+                  minLatency = duration;
+                }
+                finalResponseData = response.data;
+                success = true;
+              }
+            } catch (error) {
+              console.error(`测试节点 ${index + 1} 第 ${i + 1} 次尝试失败:`, error);
             }
-          } catch (error) {
-            console.error(`测试节点 ${index + 1} 失败:`, error);
+          }
+
+          if (success && finalResponseData) {
+            test.latency = minLatency;
+            const lines = finalResponseData.split('\n');
+            let ip = '';
+            let location = '';
+
+            for (const line of lines) {
+              if (line.startsWith('ip=')) {
+                ip = line.substring(3);
+              }
+              if (line.startsWith('loc=')) {
+                location = line.substring(4);
+              }
+            }
+
+            test.ip = ip || '获取失败';
+            test.location = location || '';
+            test.status = 'success';
+          } else {
             test.status = 'error';
             test.ip = '';
             test.location = '';
