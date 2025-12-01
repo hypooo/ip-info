@@ -20,6 +20,10 @@
   <link rel="icon" type="image/png" href="https://ipcheck.ing/favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont/style.css"/>
   <style>
+    html {
+      scrollbar-gutter: stable;
+    }
+
     :root {
       color-scheme: light;
       --bg-body: #ffffff;
@@ -43,37 +47,33 @@
       --info-color: #2563eb;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        color-scheme: dark;
-        --bg-body: #1a1a1a;
-        --text-body: #f3f4f6;
-        --surface-muted: #1a1a1a;
-        --surface: #1a1a1a;
-        --border-color: #3d3d3d;
-        --btn-primary-bg: #424242;
-        --btn-primary-hover-bg: #595959;
-        --btn-primary-text: #f8fafc;
-        --btn-outline-border: #6b6b6b;
-        --btn-outline-text: #e0e0e0;
-        --btn-outline-hover-bg: #6b6b6b;
-        --btn-outline-hover-text: #121212;
-        --alert-bg: var(--surface);
-        --alert-text: var(--text-body);
-        --stat-figure-color: #e0e0e0;
-        --flag-shadow: rgba(0, 0, 0, 0.45);
-        --success-color: #4ade80;
-        --error-color: #f87171;
-        --info-color: #8ab4f8;
-      }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-body: #1a1a1a;
+      --text-body: #f3f4f6;
+      --surface-muted: #1a1a1a;
+      --surface: #1a1a1a;
+      --border-color: #3d3d3d;
+      --btn-primary-bg: #424242;
+      --btn-primary-hover-bg: #595959;
+      --btn-primary-text: #f8fafc;
+      --btn-outline-border: #6b6b6b;
+      --btn-outline-text: #e0e0e0;
+      --btn-outline-hover-bg: #6b6b6b;
+      --btn-outline-hover-text: #121212;
+      --alert-bg: var(--surface);
+      --alert-text: var(--text-body);
+      --stat-figure-color: #e0e0e0;
+      --flag-shadow: rgba(0, 0, 0, 0.45);
+      --success-color: #4ade80;
+      --error-color: #f87171;
+      --info-color: #8ab4f8;
+    }
 
-      html,
-      body,
-      #app,
-      .container,
-      [class*="base"] {
-        background-color: #1a1a1a !important;
-      }
+    :root[data-theme="dark"] body,
+    :root[data-theme="dark"] .container,
+    :root[data-theme="dark"] [class*="base"] {
+      background-color: #1a1a1a !important;
     }
 
     body {
@@ -222,10 +222,24 @@
   </style>
 </head>
 
-<body class="min-h-screen" x-data="splitTestApp()" x-init="testAll()">
+<body class="min-h-screen" x-data="splitTestApp()" x-init="initTheme(); testAll()">
   <div class="container mx-auto px-4 py-4 max-w-7xl">
     <!-- 标题和说明 -->
-    <div class="text-center mb-8">
+    <div class="text-center mb-8 relative">
+      <div class="absolute right-0 top-0">
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+            <i class="bi bi-display text-xl" x-show="theme === 'system'"></i>
+            <i class="bi bi-sun-fill text-xl" x-show="theme === 'light'"></i>
+            <i class="bi bi-moon-fill text-xl" x-show="theme === 'dark'"></i>
+          </div>
+          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-300 text-left">
+            <li><a @click="setTheme('system')" :class="{ 'active': theme === 'system' }"><i class="bi bi-display"></i> 跟随系统</a></li>
+            <li><a @click="setTheme('light')" :class="{ 'active': theme === 'light' }"><i class="bi bi-sun-fill"></i> 浅色模式</a></li>
+            <li><a @click="setTheme('dark')" :class="{ 'active': theme === 'dark' }"><i class="bi bi-moon-fill"></i> 深色模式</a></li>
+          </ul>
+        </div>
+      </div>
       <h1 class="text-4xl font-bold text-base-content mb-4">分流测试</h1>
       <div class="alert max-w-4xl mx-auto custom-alert">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
@@ -320,7 +334,10 @@
                 </span>
                 <span x-show="test.status === 'success'"
                   class="max-w-56 truncate text-base-content cursor-pointer hover:underline transition-all duration-200"
-                  x-text="test.ip" @click="openIpModal(test.ip)" title="点击查看IP详情"></span>
+                  x-text="test.ip" @click="openIpExternal(test.ip)" title="点击打开IP查询网站"></span>
+                <button x-show="test.status === 'success'" @click="openIpModal(test.ip)" class="btn btn-ghost btn-xs btn-circle ml-1" title="查看详情">
+                  <i class="bi bi-info-circle-fill"></i>
+                </button>
                 <span x-show="test.status === 'error'" class="text-error">连接失败</span>
               </div>
             </div>
@@ -412,6 +429,76 @@
     </div>
   </div>
 
+  <!-- IP Details Modal -->
+  <dialog class="modal" :class="{ 'modal-open': showIpModal }">
+    <div class="modal-box w-11/12 max-w-4xl bg-base-100 relative">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="closeIpModal()">✕</button>
+      
+      <h3 class="font-bold text-lg mb-6 flex items-center gap-2">
+        <i class="bi bi-info-circle-fill"></i> IP 详情
+      </h3>
+
+      <div x-show="ipModalLoading" class="flex justify-center items-center py-12">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+
+      <div x-show="!ipModalLoading && ipModalData" class="space-y-6">
+        <!-- 基础信息 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <div class="card bg-base-200 shadow-sm">
+             <div class="card-body p-4">
+                <h4 class="card-title text-sm opacity-70 mb-2">基础信息</h4>
+                <div class="space-y-1 text-sm">
+                   <p class="flex justify-between"><span class="font-semibold">IP:</span> <span class="font-mono" x-text="ipModalData.ip"></span></p>
+                   <p class="flex justify-between"><span class="font-semibold">位置:</span> <span><span x-html="getCountryFlag(ipModalData.country_code)"></span> <span x-text="ipModalData.country_name"></span><span x-show="ipModalData.city">, </span><span x-text="ipModalData.city"></span></span></p>
+                   <p class="flex justify-between"><span class="font-semibold">区域:</span> <span x-text="ipModalData.region"></span></p>
+                   <p class="flex justify-between"><span class="font-semibold">时区:</span> <span x-text="ipModalData.time_zone.name"></span></p>
+                   <p class="flex justify-between"><span class="font-semibold">坐标:</span> <span class="font-mono" x-text="`${ipModalData.latitude}, ${ipModalData.longitude}`"></span></p>
+                </div>
+             </div>
+           </div>
+           
+           <div class="card bg-base-200 shadow-sm">
+             <div class="card-body p-4">
+                <h4 class="card-title text-sm opacity-70 mb-2">网络信息</h4>
+                <div class="space-y-1 text-sm">
+                   <template x-if="ipModalData.asn">
+                       <div class="contents">
+                           <p class="flex justify-between"><span class="font-semibold">ASN:</span> <span class="font-mono" x-text="ipModalData.asn.asn"></span></p>
+                           <p class="flex justify-between"><span class="font-semibold">组织:</span> <span class="text-right truncate max-w-[200px]" x-text="ipModalData.asn.name"></span></p>
+                           <p class="flex justify-between"><span class="font-semibold">路由:</span> <span class="font-mono" x-text="ipModalData.asn.route"></span></p>
+                       </div>
+                   </template>
+                   <template x-if="ipModalData.carrier">
+                      <p class="flex justify-between"><span class="font-semibold">运营商:</span> <span class="text-right truncate max-w-[200px]" x-text="ipModalData.carrier.name"></span></p>
+                   </template>
+                </div>
+             </div>
+           </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+            <div class="card bg-base-200 shadow-sm">
+               <div class="card-body p-4">
+                  <h4 class="card-title text-sm opacity-70 mb-2">威胁情报</h4>
+                  <template x-if="ipModalData.threat">
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <div class="badge badge-sm" :class="ipModalData.threat.is_proxy ? 'badge-error' : 'badge-neutral'" x-text="ipModalData.threat.is_proxy ? '代理服务器' : '非代理'"></div>
+                        <div class="badge badge-sm" :class="ipModalData.threat.is_datacenter ? 'badge-warning' : 'badge-neutral'" x-text="ipModalData.threat.is_datacenter ? '数据中心/云服务' : '非数据中心'"></div>
+                        <div class="badge badge-sm" :class="ipModalData.threat.is_known_attacker ? 'badge-error' : 'badge-neutral'" x-text="ipModalData.threat.is_known_attacker ? '已知攻击源' : '非攻击源'"></div>
+                        <div class="badge badge-sm" :class="ipModalData.threat.is_known_abuser ? 'badge-error' : 'badge-neutral'" x-text="ipModalData.threat.is_known_abuser ? '已知滥用源' : '非滥用源'"></div>
+                    </div>
+                  </template>
+               </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button @click="closeIpModal()">close</button>
+    </form>
+  </dialog>
+
   <script>
     function splitTestApp() {
       return {
@@ -420,6 +507,39 @@
         showIpModal: false,
         ipModalUrl: '',
         ipModalLoading: false,
+        ipModalData: null,
+        theme: 'system',
+
+        initTheme() {
+          const saved = localStorage.getItem('theme');
+          this.theme = saved || 'system';
+          this.applyTheme();
+
+          // 监听系统主题变化
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (this.theme === 'system') {
+              this.applyTheme();
+            }
+          });
+        },
+
+        setTheme(mode) {
+          this.theme = mode;
+          localStorage.setItem('theme', mode);
+          this.applyTheme();
+          // 关闭下拉菜单 (移除焦点)
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+        },
+
+        applyTheme() {
+          let targetTheme = this.theme;
+          if (targetTheme === 'system') {
+            targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', targetTheme);
+        },
 
         tests: [
           {
@@ -525,27 +645,38 @@
           return nameMap[countryCode] || countryCode || '未知';
         },
 
-        // 添加打开IP弹窗的方法
-        openIpModal(ip) {
+        // 打开IP详情弹窗
+        async openIpModal(ip) {
+          if (!ip || ip === '获取失败') {
+            return;
+          }
+
+          this.showIpModal = true;
+          this.ipModalLoading = true;
+          this.ipModalData = null;
+
+          try {
+            const response = await axios.get(`https://ip.vbr.me/${ip}`);
+            this.ipModalData = response.data;
+          } catch (error) {
+            console.error('获取IP详情失败:', error);
+          } finally {
+            this.ipModalLoading = false;
+          }
+        },
+        
+        // 打开外部IP查询链接
+        openIpExternal(ip) {
           if (!ip || ip === '获取失败') {
             return;
           }
 
           const url = `https://iplark.com/${ip}`;
-
-          // --- 居中对齐的关键代码 ---
-
-          // 1. 定义弹窗的尺寸
           const popupWidth = 1000;
           const popupHeight = 1040;
-
-          // 2. 计算弹窗的左上角坐标，使其居中
-          // 屏幕中心点 X 坐标 - 弹窗宽度的一半
           const left = (window.screen.width / 2) - (popupWidth / 2);
-          // 屏幕中心点 Y 坐标 - 弹窗高度的一半
           const top = (window.screen.height / 2) - (popupHeight / 2);
 
-          // 3. 将计算出的坐标和尺寸加入到特性字符串中
           const windowFeatures = `
                 width=${popupWidth},
                 height=${popupHeight},
@@ -555,6 +686,11 @@
                 resizable=yes
               `;
           window.open(url, '_blank', windowFeatures);
+        },
+
+        closeIpModal() {
+          this.showIpModal = false;
+          this.ipModalData = null;
         },
 
         async testSingle(index) {
