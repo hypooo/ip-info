@@ -352,8 +352,12 @@
             <!-- 单独测试按钮 -->
             <div class="card-actions justify-center mt-4">
               <button @click="testSingle(index)" :disabled="test.status === 'testing'"
-                class="btn btn-sm custom-btn-outline min-w-40" :class="{ 'loading': test.status === 'testing' }">
-                单独测试
+                class="btn btn-sm custom-btn-outline min-w-40">
+                <span x-show="test.status !== 'testing'">单独测试</span>
+                <span x-show="test.status === 'testing'" class="flex items-center justify-center gap-1">
+                  <span class="loading loading-spinner loading-xs"></span>
+                  测试中
+                </span>
               </button>
             </div>
           </div>
