@@ -195,7 +195,7 @@
       border: 1px solid var(--border-color) !important;
       border-radius: 0.75rem;
       color: var(--text-body);
-      padding: 1.5rem !important;
+      padding: 1.25rem !important;
       place-items: unset !important;
     }
 
@@ -223,9 +223,9 @@
 </head>
 
 <body class="min-h-screen" x-data="splitTestApp()" x-init="initTheme(); testAll()">
-  <div class="container mx-auto px-4 py-4 max-w-7xl">
+  <div class="container mx-auto px-4 py-3 max-w-7xl">
     <!-- 标题和说明 -->
-    <div class="text-center mb-8 relative">
+    <div class="text-center mb-3 relative">
       <div class="absolute right-0 top-0">
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
@@ -240,38 +240,38 @@
           </ul>
         </div>
       </div>
-      <h1 class="text-4xl font-bold text-base-content mb-4">分流测试</h1>
-      <div class="alert max-w-4xl mx-auto custom-alert">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <h1 class="text-3xl font-bold text-base-content mb-3">分流测试</h1>
+      <div class="alert max-w-4xl mx-auto custom-alert py-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
-        <span>分流测试用于判断代理软件基于域名的规则设置是否正确。在进行测试之前，你需要先参考下方的卡片，在你的代理软件里对 IPCheck.ing 的 8 个不同的 URL 设置不同的域名分流规则。</span>
+        <span>分流测试用于判断代理软件基于域名的规则设置是否正确。在进行测试之前，你需要先参考下方的卡片,在你的代理软件里对测试 URL 设置不同的域名分流规则。</span>
       </div>
     </div>
 
     <!-- 控制按钮 -->
-    <div class="text-center mb-8 space-x-4">
-      <button @click="testAll()" :disabled="isTestingAll" class="btn btn-lg custom-btn-primary relative min-w-64">
+    <div class="text-center mb-3 space-x-4">
+      <button @click="testAll()" :disabled="isTestingAll" class="btn btn-md custom-btn-primary relative min-w-48">
         <span :class="{ 'opacity-0': isTestingAll }">开始测试所有节点</span>
         <span x-show="isTestingAll" class="absolute inset-0 flex items-center justify-center">
           <span class="loading loading-spinner loading-sm mr-2"></span>
           测试中...
         </span>
       </button>
-      <button @click="clearResults()" class="btn btn-lg custom-btn-outline">
+      <button @click="clearResults()" class="btn btn-md custom-btn-outline">
         清除结果
       </button>
     </div>
 
     <!-- 测试结果网格 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
       <template x-for="(test, index) in tests" :key="index">
-        <div class="card bg-base-100 border-l-4 custom-border min-h-[280px]">
-          <div class="card-body flex flex-col">
+        <div class="card bg-base-100 border-l-4 custom-border min-h-[215px]">
+          <div class="card-body flex flex-col p-4">
             <!-- 卡片头部 -->
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="card-title text-lg flex items-center gap-2">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="card-title text-base flex items-center gap-2">
                 <i class="bi bi-signpost-split-fill"></i>
                 <span>检测</span>
                 <span x-html="`<i class='bi bi-${index + 1}-square'></i>`"></span>
@@ -305,7 +305,7 @@
             </div>
 
             <!-- IP 地址 -->
-            <div class="ip-font text-lg mb-4 min-h-[2rem] flex items-center gap-2" x-data="{ copied: false }">
+            <div class="ip-font text-base mb-3 min-h-[1.5rem] flex items-center gap-2" x-data="{ copied: false }">
               <div class="relative">
                 <i class="bi bi-pc-display-horizontal cursor-pointer transition-colors"
                   :class="{ 'text-success': copied }" @click="
@@ -343,7 +343,7 @@
             </div>
 
             <!-- 地区信息 -->
-            <div class="flex flex-col min-h-[2rem]">
+            <div class="flex flex-col min-h-[1.5rem]">
               <div class="flex items-center">
                 <template x-if="test.status === 'waiting'">
                   <span class="text-base-content/50">等待获取地区信息...</span>
@@ -352,7 +352,7 @@
                   <span class="text-warning">获取地区信息中...</span>
                 </template>
                 <template x-if="test.status === 'success' && test.location">
-                  <div class="ip-font text-base mb-2 flex items-center gap-2">
+                  <div class="ip-font text-sm mb-2 flex items-center gap-2">
                     <i class="bi bi-geo-alt-fill"></i>
                     <span x-html="getCountryFlag(test.location)"></span> <span
                       x-text="getLocationName(test.location)"></span>
@@ -367,9 +367,9 @@
             </div>
 
             <!-- 单独测试按钮 -->
-            <div class="card-actions justify-center mt-4">
+            <div class="card-actions justify-center mt-3">
               <button @click="testSingle(index)" :disabled="test.status === 'testing'"
-                class="btn btn-sm custom-btn-outline min-w-40">
+                class="btn btn-sm custom-btn-outline min-w-36">
                 <span x-show="test.status !== 'testing'">单独测试</span>
                 <span x-show="test.status === 'testing'" class="flex items-center justify-center gap-1">
                   <span class="loading loading-spinner loading-xs"></span>
@@ -383,10 +383,10 @@
     </div>
 
     <!-- 统计信息 -->
-    <div class="card bg-base-100 statistics-card">
-      <div class="card-body">
-        <h3 class="card-title text-xl mb-6">测试结果统计</h3>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+    <div class="card bg-base-100 statistics-card mt-3">
+      <div class="card-body py-3">
+        <h3 class="card-title text-base mb-3">测试结果统计</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 w-full">
           <div class="stat">
             <div class="stat-figure text-success">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -396,7 +396,7 @@
             </div>
             <div class="stat-title">成功</div>
             <div class="stat-value text-success" x-text="successCount"></div>
-            <div class="stat-desc" x-text="`${successCount}/8 节点正常`"></div>
+            <div class="stat-desc" x-text="`${successCount}/9 节点正常`"></div>
           </div>
 
           <div class="stat">
@@ -408,7 +408,7 @@
             </div>
             <div class="stat-title">失败</div>
             <div class="stat-value text-error" x-text="failCount"></div>
-            <div class="stat-desc" x-text="`${failCount}/8 节点异常`"></div>
+            <div class="stat-desc" x-text="`${failCount}/9 节点异常`"></div>
           </div>
 
           <div class="stat">
@@ -421,7 +421,7 @@
               </svg>
             </div>
             <div class="stat-title">总计</div>
-            <div class="stat-value text-primary">8</div>
+            <div class="stat-value text-primary">9</div>
             <div class="stat-desc">测试节点总数</div>
           </div>
         </div>
@@ -597,6 +597,13 @@
             status: 'waiting',
             ip: '',
             location: ''
+          },
+          {
+            domain: 'chatgpt.com',
+            url: 'https://chatgpt.com/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
           }
         ],
 
@@ -685,7 +692,18 @@
                 scrollbars=yes,
                 resizable=yes
               `;
-          window.open(url, '_blank', windowFeatures);
+          const newWindow = window.open(url, '_blank', windowFeatures);
+
+          if (newWindow) {
+            // 当主页面获得焦点时，自动关闭弹出窗口
+            const closeOnFocus = () => {
+              if (newWindow && !newWindow.closed) {
+                newWindow.close();
+              }
+              window.removeEventListener('focus', closeOnFocus);
+            };
+            window.addEventListener('focus', closeOnFocus);
+          }
         },
 
         closeIpModal() {
