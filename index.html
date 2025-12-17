@@ -332,9 +332,18 @@
                   <span class="loading loading-dots loading-sm"></span>
                   测试中...
                 </span>
-                <span x-show="test.status === 'success'"
-                  class="max-w-56 truncate text-base-content cursor-pointer hover:underline transition-all duration-200"
-                  x-text="test.ip" @click="openIpExternal(test.ip)" title="点击打开IP查询网站"></span>
+                <div x-show="test.status === 'success'" class="dropdown dropdown-end">
+                  <span tabindex="0" role="button"
+                    class="max-w-56 truncate text-base-content cursor-pointer hover:underline transition-all duration-200"
+                    x-text="test.ip" title="点击选择 IP 查询网站"></span>
+                  <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-48 border border-base-300 text-left">
+                    <li><a @click="openIpExternal(test.ip, 'iplark')"><i class="bi bi-globe"></i> IPLark</a></li>
+                    <li><a @click="openIpExternal(test.ip, 'ippure')"><i class="bi bi-search"></i> IPPure</a></li>
+                    <li><a @click="openIpExternal(test.ip, 'scamalytics')"><i class="bi bi-shield-check"></i> Scamalytics</a></li>
+                    <li><a @click="openIpExternal(test.ip, 'ip2location')"><i class="bi bi-geo-alt"></i> IP2Location</a></li>
+                    <li><a @click="openIpExternal(test.ip, 'ping0')"><i class="bi bi-broadcast"></i> Ping0</a></li>
+                  </ul>
+                </div>
                 <button x-show="test.status === 'success'" @click="openIpModal(test.ip)" class="btn btn-ghost btn-xs btn-circle ml-1" title="查看详情">
                   <i class="bi bi-info-circle-fill"></i>
                 </button>
@@ -425,6 +434,21 @@
             <div class="stat-desc">测试节点总数</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 底部外链 -->
+    <div class="text-center mt-6 mb-4">
+      <div class="flex justify-center gap-6 text-sm">
+        <a href="https://ip.skk.moe" target="_blank" class="link link-hover flex items-center gap-1">
+          <i class="bi bi-box-arrow-up-right"></i> ip.skk.moe
+        </a>
+        <a href="https://ipcheck.ing" target="_blank" class="link link-hover flex items-center gap-1">
+          <i class="bi bi-box-arrow-up-right"></i> ipcheck.ing
+        </a>
+        <a href="https://ip.ll.sd" target="_blank" class="link link-hover flex items-center gap-1">
+          <i class="bi bi-box-arrow-up-right"></i> ip.ll.sd
+        </a>
       </div>
     </div>
   </div>
@@ -673,12 +697,24 @@
         },
         
         // 打开外部IP查询链接
-        openIpExternal(ip) {
+        openIpExternal(ip, site = 'iplark') {
           if (!ip || ip === '获取失败') {
             return;
           }
 
-          const url = `https://iplark.com/${ip}`;
+          // 关闭下拉菜单
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+
+          const urls = {
+            'iplark': `https://iplark.com/${ip}`,
+            'scamalytics': `https://scamalytics.com/ip/${ip}`,
+            'ippure': `https://ippure.com/?ip=${ip}`,
+            'ip2location': `https://www.ip2location.com/demo/${ip}`,
+            'ping0': `https://ping0.cc/ip/${ip}`
+          };
+          const url = urls[site] || urls['iplark'];
           const popupWidth = 1000;
           const popupHeight = 1040;
           const left = (window.screen.width / 2) - (popupWidth / 2);
