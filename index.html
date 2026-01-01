@@ -930,12 +930,11 @@
           test.location = '';
           test.latency = 0;
 
-          let minLatency = Infinity;
+          const latencies = [];
           let finalResponseData = null;
-          let success = false;
 
-          // 连续测试3次，取最小延迟，以消除首次连接建立（DNS/TCP/TLS）带来的额外耗时
-          for (let i = 0; i < 3; i++) {
+          // 连续测试 5 次，去掉两个极值后取平均值，以消除首次连接建立（DNS/TCP/TLS）带来的额外耗时
+          for (let i = 0; i < 5; i++) {
             const startTime = Date.now();
             try {
               // 添加时间戳防止浏览器缓存响应结果
@@ -950,19 +949,19 @@
               const duration = endTime - startTime;
 
               if (response.status === 200) {
-                if (duration < minLatency) {
-                  minLatency = duration;
-                }
+                latencies.push(duration);
                 finalResponseData = response.data;
-                success = true;
               }
             } catch (error) {
               console.error(`测试节点 ${index + 1} 第 ${i + 1} 次尝试失败:`, error);
             }
           }
 
-          if (success && finalResponseData) {
-            test.latency = minLatency;
+          if (latencies.length >= 3 && finalResponseData) {
+            const sortedLatencies = [...latencies].sort((a, b) => a - b);
+            const trimmedLatencies = sortedLatencies.slice(1, -1);
+            const sum = trimmedLatencies.reduce((total, value) => total + value, 0);
+            test.latency = Math.round(sum / trimmedLatencies.length);
             const lines = finalResponseData.split('\n');
             let ip = '';
             let location = '';
