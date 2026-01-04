@@ -274,7 +274,7 @@
               <h3 class="card-title text-base flex items-center gap-2">
                 <i class="bi bi-signpost-split-fill"></i>
                 <span>检测</span>
-                <span x-html="`<i class='bi bi-${index + 1}-square'></i>`"></span>
+                <span class="inline-flex items-center justify-center w-5 h-5 border border-current rounded text-xs font-bold" x-text="index + 1"></span>
               </h3>
               <div class="flex items-center gap-2">
                 <div class="indicator">
@@ -578,7 +578,7 @@
             </div>
             <div class="stat-title">成功</div>
             <div class="stat-value text-success" x-text="successCount"></div>
-            <div class="stat-desc" x-text="`${successCount}/9 节点正常`"></div>
+            <div class="stat-desc" x-text="`${successCount}/11 节点正常`"></div>
           </div>
 
           <div class="stat">
@@ -590,7 +590,7 @@
             </div>
             <div class="stat-title">失败</div>
             <div class="stat-value text-error" x-text="failCount"></div>
-            <div class="stat-desc" x-text="`${failCount}/9 节点异常`"></div>
+            <div class="stat-desc" x-text="`${failCount}/11 节点异常`"></div>
           </div>
 
           <div class="stat">
@@ -603,7 +603,7 @@
               </svg>
             </div>
             <div class="stat-title">总计</div>
-            <div class="stat-value text-primary">9</div>
+            <div class="stat-value text-primary">11</div>
             <div class="stat-desc">测试节点总数</div>
           </div>
         </div>
@@ -806,6 +806,20 @@
           {
             domain: 'chatgpt.com',
             url: 'https://chatgpt.com/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'claude.ai',
+            url: 'https://claude.ai/cdn-cgi/trace',
+            status: 'waiting',
+            ip: '',
+            location: ''
+          },
+          {
+            domain: 'grok.com',
+            url: 'https://grok.com/cdn-cgi/trace',
             status: 'waiting',
             ip: '',
             location: ''
